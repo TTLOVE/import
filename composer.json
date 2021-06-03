@@ -1,0 +1,18 @@
+{
+    "name": "ttlove/import",
+    "description": "laravel normal import",
+    "type": "library",
+    "authors": [
+        {
+            "name": "zyz",
+            "email": "348977791@qq.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.0.0"
+    },
+    "autoload": {
+        "psr-4": {
+        }
+    }
+}
