@@ -21,7 +21,7 @@
             "QT\\Import\\": "src"
         },
         "files": [
-            "./Foundation/helpers.php"
+            "./src/Foundation/helpers.php"
         ]
     }
 }
