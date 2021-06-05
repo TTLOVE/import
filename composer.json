@@ -1,5 +1,5 @@
 {
-    "name": "qt/import",
+    "name": "mqt/import",
     "description": "laravel normal import",
     "type": "library",
     "authors": [
