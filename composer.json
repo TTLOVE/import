@@ -9,10 +9,19 @@
         }
     ],
     "require": {
-        "php": ">=7.0.0"
+        "php": "^8.0.0",
+        "box/spout": "^2.7",
+        "illuminate/database": "^6.0.0",
+        "illuminate/validation": "^6.0.0",
+        "phpoffice/phpspreadsheet": "^1.11",
+        "illuminate/support": "^6.0.0"
     },
     "autoload": {
         "psr-4": {
-        }
+            "QT\\Import\\": "src"
+        },
+        "files": [
+            "./Foundation/helpers.php"
+        ]
     }
 }
