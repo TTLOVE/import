@@ -4,9 +4,9 @@ namespace QT\Import\Traits;
 
 use Box\Spout\Common\Type;
 use QT\Import\Exceptions\Error;
-use Box\Spout\Reader\ReaderFactory;
 use Box\Spout\Reader\SheetInterface;
 use Box\Spout\Reader\ReaderInterface;
+use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
 
 trait ParseXlsx
 {
@@ -58,9 +58,9 @@ trait ParseXlsx
      */
     protected function parseXlsx($filename, $columns, $type = Type::XLSX)
     {
-        libxml_disable_entity_loader(false);
-        $reader = ReaderFactory::create($type);
+        $reader = ReaderEntityFactory::createXLSXReader();
         $reader->open($filename);
+
         // 不跳过空行,不然会造成行号错误的情况
         if (method_exists($reader, 'setShouldPreserveEmptyRows')) {
             $reader->setShouldPreserveEmptyRows(true);
@@ -69,6 +69,7 @@ trait ParseXlsx
         $line     = 0;
         $iterator = $this->getSheet($reader, $this->sheetIndex)->getRowIterator();
         foreach ($iterator as $row) {
+            $row = $row->getCells();
             if ($line++ === 0) {
                 // 处理列名顺序
                 $fields = $this->getFields($row, array_flip($columns));
@@ -138,7 +139,8 @@ trait ParseXlsx
     protected function getFields($firstRow, $columns)
     {
         $results = [];
-        foreach ($firstRow as $value) {
+        foreach ($firstRow as $row) {
+            $value = $row->getValue();
             // 剔除括号内的内容
             if (false !== strpos($value, '(')) {
                 $value = array_first(explode('(', $value));
