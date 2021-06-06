@@ -187,6 +187,6 @@ trait CheckAndFormat
      */
     protected function getSheetPos($column, $line)
     {
-        return CellHelper::getCellIndexFromColumnIndex($column) . $line;
+        return CellHelper::getColumnLettersFromColumnIndex($column) . $line;
     }
 }
