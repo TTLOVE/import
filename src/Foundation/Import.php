@@ -65,7 +65,7 @@ class Import
     /**
      * 构造函数不允许传参，保证从服务容器中生成时不会出错
      */
-    final public function __construct()
+    public function __construct()
     {
         $this->bootCheckTableDuplicated();
     }
@@ -197,7 +197,7 @@ class Import
      */
     protected function reportErrors($errors)
     {
-        $filename = "/tmp/{$this->task->unique_id}.xlsx";
+        $filename = "/tmp/{$this->getUniqueId()}.xlsx";
         $template = new ImportTemplate(
             array_merge(['err_msg' => '错误原因'], $this->fields),
             array_merge(['err_msg' => 'required'], $this->rules),
@@ -211,6 +211,18 @@ class Import
         } finally {
             $this->errorFilename = $filename;
         }
+    }
+
+    /**
+     * 获取唯一 id 放置错误文件信息
+     *
+     * @param string $id
+     * @return string
+     */
+    protected function getUniqueId($id = 0): string
+    {
+        $id = $id ?: uniqid();
+        return sprintf('%s-%s-%d', config('app.name'), $id, time());
     }
 
     /**
