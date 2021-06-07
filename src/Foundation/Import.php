@@ -12,7 +12,7 @@ use QT\Import\Exceptions\ImportError;
 use QT\Import\Foundation\ImportTemplate;
 use QT\Import\Traits\CheckTableDuplicated;
 
-class ImportTask
+class Import
 {
     use ParseXlsx;
     use RowsValidator;
