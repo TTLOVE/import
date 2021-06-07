@@ -21,6 +21,9 @@ class ImportTask
     use CheckAndFormat;
     use CheckTableDuplicated;
 
+    // excel单格字符长度不允许超过32767
+    const MAX_CHARACTERS_PER_CELL = 32767;
+
     /**
      * 外部输入参数
      */
@@ -140,6 +143,7 @@ class ImportTask
             // 记录错误信息
             Log::error($e);
         } finally {
+            $this->taskFinished();
         }
     }
 
@@ -271,10 +275,18 @@ class ImportTask
 
             // 按照fields顺序取出字段,防止row内容被打乱导致与原表数据不符
             $row = $error->getErrorRow($fields);
-            // excel单格字符长度不允许超过32767
             yield array_merge(
-                [mb_substr($errMsg, 0, Worksheet::MAX_CHARACTERS_PER_CELL)], $row
+                [mb_substr($errMsg, 0, self::MAX_CHARACTERS_PER_CELL)], $row
             );
         }
+    }
+
+    /**
+     * 任务结束处理逻辑
+     *
+     * @return void
+     */
+    protected function taskFinished()
+    {
     }
 }
