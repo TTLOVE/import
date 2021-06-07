@@ -4,7 +4,6 @@ namespace QT\Import\Foundation;
 
 use QT\Import\Exceptions\Error;
 use QT\Import\Traits\ParseXlsx;
-use QT\Import\Contracts\Uploader;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use QT\Import\Traits\RowsValidator;
@@ -12,7 +11,6 @@ use QT\Import\Traits\CheckAndFormat;
 use QT\Import\Exceptions\ImportError;
 use QT\Import\Foundation\ImportTemplate;
 use QT\Import\Traits\CheckTableDuplicated;
-use Box\Spout\Writer\XLSX\Internal\Worksheet;
 
 class ImportTask
 {
@@ -58,49 +56,11 @@ class ImportTask
     protected $errors = [];
 
     /**
-     * 字典
+     * 错误信息 excel 文件路径
      *
-     * @var array
+     * @var string
      */
-    protected $dict = [];
-
-    /**
-     * 字典是否加载
-     *
-     * @var boolean
-     */
-    protected $isDictLoad = false;
-
-    /**
-     * 额外字典,非主表内的字典字段
-     *
-     * @var array
-     */
-    protected $extraDictFields = [
-        // table => [
-        //    column => display_name
-        // ]
-    ];
-
-    /**
-     * 导入匹配字典字段信息，如果字段名不为字典对应字段，要自行设置
-     * eq: 实际字段名[family1_relationship] -> 字典[relationship]
-     *
-     * @var array
-     */
-    protected $extraDictFieldMaps = [
-        // column => dict_field
-    ];
-
-    /**
-     * excel 下拉字典信息，需手动配置
-     * eq:  字典对应字段
-     *
-     * @var array
-     */
-    protected $optionalDict = [
-        // dict_field
-    ];
+    protected $errorFilename = '';
 
     /**
      * 构造函数不允许传参，保证从服务容器中生成时不会出错
@@ -138,6 +98,10 @@ class ImportTask
             DB::transaction(function () {
                 $this->insertDB();
             });
+
+            if (!empty($this->errors)) {
+                $this->reportErrors($this->errors);
+            }
 
         } catch (\Throwable $e) {
             // 记录错误信息
@@ -231,7 +195,7 @@ class ImportTask
      * @param array $errors
      * @return string
      */
-    protected function reportErrors(Uploader $uploader, $errors)
+    protected function reportErrors($errors)
     {
         $filename = "/tmp/{$this->task->unique_id}.xlsx";
         $template = new ImportTemplate(
@@ -244,11 +208,8 @@ class ImportTask
             $template->generateColumns();
             $template->fillSimpleData($this->formatErrors($errors));
             $template->save($filename);
-
-            // todo config()
-            // return $uploader->upload($filename, config('upload.bucket'));
         } finally {
-            @unlink($filename);
+            $this->errorFilename = $filename;
         }
     }
 

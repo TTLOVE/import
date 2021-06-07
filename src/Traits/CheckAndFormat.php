@@ -37,6 +37,11 @@ trait CheckAndFormat
     protected $customAttributes = [];
 
     /**
+     * @var QT\Import\Contracts\Dictionary
+     */
+    protected $dictionary;
+
+    /**
      * @var array 字典错误时自定义错误信息
      */
     protected $dictErrorMessages = [];
@@ -83,14 +88,14 @@ trait CheckAndFormat
      * @param array $fields
      * @return array
      */
-    protected function formatRow($data, $line, $fields, Dictionary $dict)
+    protected function formatRow($data, $line, $fields)
     {
         $errors = [];
 
         foreach ($data as $field => $value) {
             try {
                 // 转换枚举类型
-                $data[$field] = $this->fromDict($field, $value, $dict);
+                $data[$field] = $this->fromDict($field, $value);
             } catch (RuntimeException $e) {
                 // 记录字典不匹配的错误
                 $pos      = $this->getSheetPos(array_search($field, $fields), $line);
@@ -140,16 +145,16 @@ trait CheckAndFormat
      * @param mixed
      * @throws RuntimeException
      */
-    protected function fromDict($field, $value, Dictionary $dictionary)
+    protected function fromDict($field, $value)
     {
         $field        = $this->extraDictFieldMaps[$field] ?? $field;
-        $dictionaries = $dictionary->getDictionaries();
+        $dictionaries = $this->dictionary->getDictionaries();
 
         if (!array_key_exists($field, $dictionaries)) {
             return $value;
         }
 
-        $optionalDict = $dictionary->getOptionalDictionaries($dictionaries);
+        $optionalDict = $this->dictionary->getOptionalDictionaries($dictionaries);
         $keyName      = isset($optionalDict[$field]) ? 'name' : 'code';
         $dict         = collect($dictionaries[$field])->keyBy($keyName);
 
